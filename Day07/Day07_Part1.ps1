@@ -21,13 +21,13 @@ $orderTable = @{
 	'9' = 5; '8' = 6; '7' = 7; '6' = 8; '5' = 9; '4' = 10; '3' = 11; '2' = 12
 }
 
-$orderedHands = $hands | Sort-Object -Property @{ Expression = { $_.DuplicateCount }; Descending = $false },
-												@{ Expression = { $_.DistinctCount }; Descending = $true },
-												@{ Expression = { $orderTable[$_.Card[0].ToString()] }; Descending = $true },
-												@{ Expression = { $orderTable[$_.Card[1].ToString()] }; Descending = $true },
-												@{ Expression = { $orderTable[$_.Card[2].ToString()] }; Descending = $true },
-												@{ Expression = { $orderTable[$_.Card[3].ToString()] }; Descending = $true },
-												@{ Expression = { $orderTable[$_.Card[4].ToString()] }; Descending = $true }
+$orderedHands = $hands | Sort-Object -Property  { $_.DuplicateCount },
+												{ -($_.DistinctCount) },
+												{ -($orderTable[$_.Card[0].ToString()]) },
+												{ -($orderTable[$_.Card[1].ToString()]) },
+												{ -($orderTable[$_.Card[2].ToString()]) },
+												{ -($orderTable[$_.Card[3].ToString()]) },
+												{ -($orderTable[$_.Card[4].ToString()]) }
 
 $orderedHands | ForEach-Object -Begin { $index = 1 } -Process { 
 	$result += $index * $_.Money
