@@ -4,7 +4,7 @@ $result = 0
 $mapData = @{}
 
 Function ConvertMappingValue($ConvertInfo, [long]$Number) {
-    foreach ($info in $ConvertInfo) {
+    foreach ($info in $ConvertInfo.Ranges) {
         if ($Number -ge $info.Start -and $Number -le $info.End) {
             return $Number + $info.Gap
         }
@@ -22,7 +22,10 @@ $lines | ForEach-Object {
     if ($_ -match '(.*)-(.*)-(.*) map:') {
         $from = $matches[1]
         $to = $matches[3]
-        $mapData["${from}:${to}"] = @()
+        $mapData[$from] = @{
+            'To' = $to
+            'Ranges' = @()
+        }
     }
     else {
         $numbers = $_.Split()
@@ -32,7 +35,7 @@ $lines | ForEach-Object {
         $newStart = [long]$numbers[0]
         $gap = $newStart - $start
 
-        $mapData["${from}:${to}"] += @{
+        $mapData[$from].Ranges += @{
             'Start' = $start
             'End'   = $end
             'Gap'   = $gap
@@ -44,13 +47,13 @@ if ($seedLine -match 'seeds: (.*)') {
     $seeds = $matches[1].Split()
     $seeds | ForEach-Object -Begin { $lowest = [long]::MaxValue } -Process {
         $seed = [long]$_
-        $soil = ConvertMappingValue -ConvertInfo $mapData['seed:soil'] -Number $seed
-        $fertilizer = ConvertMappingValue -ConvertInfo $mapData['soil:fertilizer'] -Number $soil
-        $water = ConvertMappingValue -ConvertInfo $mapData['fertilizer:water'] -Number $fertilizer
-        $light = ConvertMappingValue -ConvertInfo $mapData['water:light'] -Number $water
-        $temperature = ConvertMappingValue -ConvertInfo $mapData['light:temperature'] -Number $light
-        $humidity = ConvertMappingValue -ConvertInfo $mapData['temperature:humidity'] -Number $temperature
-        $location = ConvertMappingValue -ConvertInfo $mapData['humidity:location'] -Number $humidity
+        $soil = ConvertMappingValue -ConvertInfo $mapData['seed'] -Number $seed
+        $fertilizer = ConvertMappingValue -ConvertInfo $mapData['soil'] -Number $soil
+        $water = ConvertMappingValue -ConvertInfo $mapData['fertilizer'] -Number $fertilizer
+        $light = ConvertMappingValue -ConvertInfo $mapData['water'] -Number $water
+        $temperature = ConvertMappingValue -ConvertInfo $mapData['light'] -Number $light
+        $humidity = ConvertMappingValue -ConvertInfo $mapData['temperature'] -Number $temperature
+        $location = ConvertMappingValue -ConvertInfo $mapData['humidity'] -Number $humidity
         
         $lowest = [Math]::Min($lowest, $location)
     }
