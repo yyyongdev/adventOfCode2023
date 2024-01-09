@@ -1,4 +1,4 @@
-$day = 5
+$day = 7
 
 Set-Location $PSScriptRoot
 

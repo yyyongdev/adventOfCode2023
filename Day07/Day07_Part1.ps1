@@ -6,12 +6,13 @@ $hands = @()
 $lines = Get-Content -Path "./$dataFile"
 $lines | ForEach-Object {
 	$card, $money = $_.Split()
-	$dupicateCard = $card.ToCharArray() | Group-Object | Sort-Object Count -Descending | Select-Object -First 1
-	
+	$duplicateCard = $card.ToCharArray() | Group-Object | Sort-Object Count -Descending | Select-Object -First 1
+	$distinctCard = $card.ToCharArray() | Sort-Object -Unique
 	$hands += @{
 		'Card'           = $card
 		'Money'          = $money
-		'DuplicateCount' = $dupicateCard.Count
+		'DuplicateCount' = $duplicateCard.Count
+		'DistinctCount'  = $distinctCard.Count
 	}
 }
 
@@ -21,6 +22,7 @@ $orderTable = @{
 }
 
 $orderedHands = $hands | Sort-Object -Property @{ Expression = { $_.DuplicateCount }; Descending = $false },
+												@{ Expression = { $_.DistinctCount }; Descending = $true },
 												@{ Expression = { $orderTable[$_.Card[0].ToString()] }; Descending = $true },
 												@{ Expression = { $orderTable[$_.Card[1].ToString()] }; Descending = $true },
 												@{ Expression = { $orderTable[$_.Card[2].ToString()] }; Descending = $true },
